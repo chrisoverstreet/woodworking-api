@@ -1,7 +1,17 @@
 type User {
   id: ID!
+  firebaseUid: ID
+  name: String!
+  email: String
+  createdAt: String!
+  updatedAt: String!
 }
 
 type Query {
-  user(id: ID!): User
+  firebaseJWT(firebaseUid: ID!): String!
+  user(id: ID!): User!
+}
+
+type Mutation {
+  register(firebaseUid: ID!, name: String!, email: String!): User!
 }
