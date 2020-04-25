@@ -1,0 +1,21 @@
+version: '3.1'
+
+services:
+
+  db:
+    image: postgres:12.2-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: woodworking
+      POSTGRES_PASSWORD: pass
+      POSTGRES_USER: dbuser
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
