@@ -1,8 +1,8 @@
 import { Stream } from 'stream';
-import { v2 as cloudinary } from 'cloudinary';
 
 import { Media } from '../entity/Media';
 import { User } from '../entity/User';
+import { destroy, uploadFile } from '../lib/cloudinary';
 
 interface AddMediaArgs {
   file: Promise<{
@@ -13,43 +13,26 @@ interface AddMediaArgs {
 }
 
 export async function addMedia({ file, user }: AddMediaArgs): Promise<Media> {
-  const { mimetype, createReadStream } = await file;
-
   const {
-    public_id: publicId,
+    publicId,
+    contentType,
     width,
     height,
     format,
-    resource_type: resourceType,
+    resourceType,
     bytes,
-    // info = null,
-  } = await new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        // categorization: 'google_tagging',
-      },
-      (error, image) => {
-        if (error) {
-          return reject(error);
-        }
-        return resolve(image);
-      },
-    );
-
-    createReadStream().pipe(uploadStream);
-  });
+  } = await uploadFile(file);
 
   const media = new Media();
 
   media.publicId = publicId;
-  media.contentType = mimetype;
+  media.contentType = contentType;
   media.width = width;
   media.height = height;
   media.format = format;
   media.resourceType = resourceType;
   media.bytes = bytes;
 
-  media.publicId = publicId;
   if (user) {
     media.user = user;
   }
@@ -73,5 +56,5 @@ export async function deleteMedia({
   }
 
   // eslint-disable-next-line no-console
-  cloudinary.uploader.destroy(publicId).catch(console.error);
+  destroy(publicId).catch(console.error);
 }

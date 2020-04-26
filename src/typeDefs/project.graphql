@@ -4,6 +4,7 @@ type Project {
   user: User!
   title: String!
   content: String
+  media: [Media!]!
   createdAt: String!
   updatedAt: String!
   publishedAt: String
@@ -15,6 +16,7 @@ type Query {
 
 type Mutation {
   addProject(title: String!, content: String, publishedAt: String): Project!
+  addProjectMedia(file: Upload!, projectId: ID!): Media!
   updateProject(
     id: ID!
     title: String

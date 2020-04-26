@@ -1,8 +1,29 @@
-import { AuthenticationError, ValidationError } from 'apollo-server-express';
+import {
+  AuthenticationError,
+  ApolloError,
+  ValidationError,
+} from 'apollo-server-express';
+import { Stream } from 'stream';
 
-import { Context } from '../context';
-import { Project } from '../entity/Project';
 import { addProject, updateProject } from '../repositories/project.repository';
+import { addProjectMedia } from '../repositories/projectMedia.repository';
+import { Context } from '../context';
+import { Media } from '../entity/Media';
+import { Project } from '../entity/Project';
+
+async function mediaResolver(
+  { id }: Project,
+  _args: void,
+  { MediaByProjectIdLoader, MediaLoader }: Context,
+): Promise<Media[]> {
+  const media = await MediaByProjectIdLoader.load(id);
+
+  media.forEach((singleMedia) =>
+    MediaLoader.prime(singleMedia.id, singleMedia),
+  );
+
+  return media;
+}
 
 async function userResolver(
   { user }: Project,
@@ -66,6 +87,47 @@ async function addProjectResolver(
   return project;
 }
 
+interface AddProjectMediaArgs {
+  file: Promise<{
+    mimetype: string;
+    createReadStream: () => Stream;
+  }>;
+  projectId: string;
+}
+
+async function addProjectMediaResolver(
+  _parent: void,
+  { file, projectId }: AddProjectMediaArgs,
+  { MediaLoader, ProjectLoader, userId, UserLoader }: Context,
+): Promise<Media> {
+  if (!userId) {
+    throw new AuthenticationError('Not authorized');
+  }
+
+  const user = await UserLoader.load(userId);
+  if (!user) {
+    throw new ValidationError('User not found');
+  }
+
+  const project = await ProjectLoader.load(projectId);
+  if (!project) {
+    throw new ValidationError('Project not found');
+  }
+  if (project.user.id !== userId) {
+    throw new ValidationError('Not authorized');
+  }
+
+  const projectMedia = await addProjectMedia({ file, project, user });
+
+  const media = await MediaLoader.load(projectMedia.media.id);
+
+  if (!media) {
+    throw new ApolloError('There was an error uploading media');
+  }
+
+  return media;
+}
+
 interface UpdateProjectArgs {
   id: string;
   title: string | null | undefined;
@@ -104,6 +166,7 @@ async function updateProjectResolver(
 
 export default {
   Project: {
+    media: mediaResolver,
     user: userResolver,
     userId: userIdResolver,
   },
@@ -112,6 +175,7 @@ export default {
   },
   Mutation: {
     addProject: addProjectResolver,
+    addProjectMedia: addProjectMediaResolver,
     updateProject: updateProjectResolver,
   },
 };
