@@ -33,6 +33,10 @@ async function userResolver(
   return UserLoader.load(user.id);
 }
 
+function userIdResolver({ user }: WebResult): string {
+  return user.id;
+}
+
 interface WebResultArgs {
   id: string;
 }
@@ -83,6 +87,7 @@ export default {
   WebResult: {
     media: mediaResolver,
     user: userResolver,
+    userId: userIdResolver,
   },
   Query: {
     webResult: webResultResolver,
