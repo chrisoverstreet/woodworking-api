@@ -1,0 +1,29 @@
+enum ResourceType {
+  image
+  raw
+  video
+}
+
+type Media {
+  id: ID!
+  publicId: ID!
+  userId: ID
+  user: User
+  contentType: String!
+  height: Int!
+  width: Int!
+  resourceType: ResourceType!
+  bytes: Int!
+  format: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Query {
+  media(id: ID!): Media!
+}
+
+type Mutation {
+  addMedia(file: Upload!): Media!
+  deleteMedia(id: ID!): String!
+}
