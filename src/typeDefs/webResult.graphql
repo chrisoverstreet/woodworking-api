@@ -1,0 +1,26 @@
+type WebResult {
+  id: ID!
+  userId: ID
+  user: User
+  title: String!
+  content: String
+  media: Media!
+  author: String
+  url: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Query {
+  webResult(id: ID!): WebResult!
+}
+
+type Mutation {
+  addWebResult(
+    title: String!
+    content: String
+    author: String
+    url: String!
+    file: Upload!
+  ): WebResult!
+}
