@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/chrisoverstreet/woodworking-api#readme",
   "dependencies": {
-    "apollo-server-express": "2.13.0",
+    "apollo-server-express": "2.14.2",
     "body-parser": "1.19.0",
     "class-validator": "0.12.2",
     "cloudinary": "1.21.0",
